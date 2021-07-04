@@ -9,14 +9,53 @@ export ANDROID_SDK=/Users/mj/Library/Android/sdk
 export ANDROID_SDK_ROOT=$ANDROID_SDK
 export QT_HOME=/Users/mj/Qt/5.14.2/clang_64/bin
 export QT_TOOLS_HOME=/Users/mj/Qt/Tools/QtInstallerFramework/3.2/bin
+export LVHIEI_BIN=$HOME/bin
+export LVHIEI_BIN_EXTRA=$LVHIEI_BIN/python:$LVHIEI_BIN/shell
 export PATH=$PATH:$ANDROID_SDK:$ANDROID_SDK/platform-tools:$ANDROID_SDK/tools
 export PATH=$PATH:$NDK_ROOT:$NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/darwin-x86_64/bin
-export PATH=$PATH:/Users/mj/bin
+export PATH=$PATH:$LVHIEI_BIN:$LVHIEI_BIN_EXTRA
 export PATH=$PATH:/Users/mj/source/googlesource/depot_tools
 export PATH=$PATH:$QT_HOME:$QT_TOOLS_HOME
 export HOMEBREW_NO_AUTO_UPDATE=true
+export EDITOR=vim
 
 ## git alias
+function func_gp(){
+    branch=`git symbolic-ref --short -q HEAD`
+    echo "current branch is $branch"
+    remote_branch=`git branch -r | grep -w origin/$branch | sed "s/ *$//g" | sed "s/ *//g"`
+    echo "remote branch is $remote_branch"
+    if [[ "$remote_branch" == "origin/$branch" ]]; 
+    then
+        echo "already has remote branch"
+        git push
+    else
+        echo "set upstream for $branch"
+        git push --set-upstream origin $branch 
+    fi
+}
+
+function func_gsf(){
+    commit_id="HEAD"
+    if [ $# -ge 1 ];
+    then
+        commit_id=$1
+    fi
+#    parent=`git rev-parse ${commit_id}^`
+#    echo "commit_id is $commit_id, parent is $parent"
+#    git diff --name-only $parent $commit_id
+    git diff --name-only ${commit_id}^ $commit_id
+}
+
+function func_gsb(){
+    commit_id="HEAD"
+    if [ $# -ge 1 ];
+    then
+        commit_id=$1
+    fi
+    git branch -r --contains ${commit_id} 
+}
+
 alias gg='git lg'
 alias gs='git show'
 alias gsm='git submodule'
@@ -32,22 +71,11 @@ alias gssp='git stash show -p'
 alias gbdr='func_gbdr(){git branch -D $1;git push origin :$1};func_gbdr'
 #alias gbdr='func_gbdr(){git branch -D $1;git push origin --delete $1};func_gbdr'
 alias gcos='func_gcos(){gco $1 && git submodule init && git submodule update};func_gcos'
-function func_gp(){
-    branch=`git symbolic-ref --short -q HEAD`
-    echo "current branch is $branch"
-    remote_branch=`git branch -r | grep $branch | sed "s/ *$//g" | sed "s/ *//g"`
-    echo "remote branch is $remote_branch"
-    if [[ "$remote_branch" == "origin/$branch" ]]; 
-    then
-        echo "already has remote branch"
-        git push
-    else
-        echo "set upstream for $branch"
-        git push --set-upstream origin $branch 
-    fi
-}
-
 alias gp='func_gp'
+## show changed file list in commit_id
+alias gsf='func_gsf'
+## show branches contains commit_id
+alias gsb='func_gsb'
 
 ## bytertc git relies
 
@@ -86,6 +114,8 @@ alias gencscopes='find . | egrep "\.h|\.c" > cscope.files;cscope -bq'
 
 ## system command alais
 alias cd='mycd(){ cd $1 && ll; };mycd'
+alias cdd='cd ~/Downloads'
+alias cdm='cd ~/Music/网易云音乐'
 alias fp='ps -ef | grep -i $1'
 alias lth='ll -t | head -n 10'
 alias uzl='unzip -l'
@@ -108,6 +138,7 @@ alias dumpap="adb $DUMP_TAIL"
 alias dumpapx="adbx $DUMP_TAIL"
 alias dumpapm="adbm $DUMP_TAIL"
 alias dumpapm8="adbm8 $DUMP_TAIL"
+alias adbxfile='adbx shell cat /sdcard/Documents/markor/dy.txt'
 
 ## gradlew alias
 alias amda='func_amda(){./gradlew $1:dependencies --configuration archives};func_amda'
@@ -123,6 +154,7 @@ alias vimrc='vim ~/.lvhiei/.lvhiei.sh'
 
 ## bytertc alias
 alias cdb='cd ~/project/ByteRTCSDK'
+alias cdl='cd ~/source/githup/lvhiei'
 
 ## iTerm2 alt + leftrow;alt + rightrow
 bindkey "\e\e[D" backward-word
