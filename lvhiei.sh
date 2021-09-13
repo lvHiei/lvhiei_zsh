@@ -19,13 +19,16 @@ export PATH=$PATH:$QT_HOME:$QT_TOOLS_HOME
 export HOMEBREW_NO_AUTO_UPDATE=true
 export EDITOR=vim
 
+## variable
+prefer_use_ag=1
+
 ## git alias
 function func_gp(){
     branch=`git symbolic-ref --short -q HEAD`
     echo "current branch is $branch"
-    remote_branch=`git branch -r | grep -w origin/$branch | sed "s/ *$//g" | sed "s/ *//g"`
+    remote_branch=`git branch -a | grep -w remotes/origin/$branch | sed "s/ *$//g" | sed "s/ *//g"`
     echo "remote branch is $remote_branch"
-    if [[ "$remote_branch" == "origin/$branch" ]]; 
+    if [[ "$remote_branch" == "remotes/origin/$branch" ]]; 
     then
         echo "already has remote branch"
         git push
@@ -67,6 +70,7 @@ alias gpl='git pull -p --rebase;git submodule update --init --recursive'
 #alias gpl='git pull;grp;gsm update --init;gsm foreach git submodule update --init'
 alias gpls='git submodule sync --recursive;gpl'
 alias gfb='git branch -a | ag'
+alias gdc='git diff --cached'
 alias gssp='git stash show -p'
 alias gbdr='func_gbdr(){git branch -D $1;git push origin :$1};func_gbdr'
 #alias gbdr='func_gbdr(){git branch -D $1;git push origin --delete $1};func_gbdr'
@@ -119,7 +123,72 @@ alias cdm='cd ~/Music/网易云音乐'
 alias fp='ps -ef | grep -i $1'
 alias lth='ll -t | head -n 10'
 alias uzl='unzip -l'
+alias szip='unzip -l'
+alias star='tar -tvf'
 
+function findstr(){
+    if [ $# -gt 1 ];then
+        ## 1. find file list in $2
+        ## 2. replace " " to "\ "
+        ## 3. split list to array and grep $1 in list
+        ## 4. grep $1 to show color result
+        find . -name "$2" | sed 's| |\\ |g' | xargs grep -F -rn "$1" | grep $1
+    else
+        if [ $prefer_use_ag -eq 1 ]; then
+            ag $1
+        else
+            grep -F -rn $1 ./*
+        fi
+    fi
+}
+
+function findinregexp(){
+    if [ $prefer_use_ag -eq 1 ];then
+        ag -G $2 $1
+    else
+        find . | egrep "$2" | sed 's| |\\ |g' | xargs  grep -F -rn "$1" | grep $1
+    fi
+}
+
+function findincpp(){
+    if [ $prefer_use_ag -eq 1 ];then
+        ag --cpp $1
+    else
+        findinregexp $1 "\.cc$|\.c$|\.h$|\.cpp$"
+    fi
+}
+
+function findincxx(){
+    findinregexp $1 "\.c$|\.h$|\.cpp$|\.cc$|\.C$|\.cxx$|\.hpp$|\.hh$|\.m$|\.mm$|\.H$|\.hxx$|\.tpp$"
+}
+
+function findinc(){
+    if [ $prefer_use_ag -eq 1 ];then
+        ag --cc $1
+    else
+        findinregexp $1 "\.c$|\.h$"
+    fi
+}
+
+function findinjava(){
+    if [ $prefer_use_ag -eq 1 ];then
+        ag --java $1
+    else
+        findinregexp $1 "\.java$"
+    fi
+}
+
+function findincmake(){
+    findinregexp $1 "CMakeLists\.txt$|\.cmake$"
+}
+
+function findinmd(){
+    if [ $prefer_use_ag -eq 1 ];then
+        ag --md $1
+    else
+        findinregexp $1 "\.md$|\.markdown$"
+    fi
+}
 
 ## adb alias
 alias adbm='adb -s 9bfb3548'
