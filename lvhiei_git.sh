@@ -36,7 +36,54 @@ function func_gsb(){
     git branch -r --contains ${commit_id} 
 }
 
+function gplb(){
+    branch=`git symbolic-ref --short -q HEAD`
+    git pull -p --rebase origin $branch
+    git submodule update --init --recursive
+}
+
+function gdf(){
+    commit_id="HEAD"
+    file_name=$1
+    if [ $# -ge 2 ];
+    then
+        commit_id=$1
+        file_name=$2
+    fi
+    git diff ${commit_id}^:${file_name} ${commit_id}:${file_name}
+}
+
+function func_gga(){
+    author=majun
+    if [ $# -ge 1 ];
+    then
+        author=$1
+    fi
+    git lg --author=$author
+}
+
+function gfixEncountered(){
+    git rm --cached -r .
+    git reset --hard
+    git rm .gitattributes
+    git reset .
+    git checkout .
+}
+
+function show_rtc_interface_change(){
+    if [ $# -lt 2 ];
+    then
+        echo "usage: $0 dst_commit compared_commit"
+    fi
+    dst_commit=$1
+    compare_commit=$2
+    git diff ${dst_commit} ${compare_commit} src/sdk/native/rtc
+}
+
 alias gg='git lg'
+alias gga='func_gga'
+alias gglt='git lglt'
+alias ggf='git lgf'
 alias gs='git show'
 alias gsm='git submodule'
 alias gpr='git pull --rebase'
@@ -45,7 +92,7 @@ alias gprf='git pull origin $1 --rebase'
 alias grp='git remote prune origin'
 alias gpl='git pull -p --rebase;git submodule update --init --recursive'
 #alias gpl='git pull;grp;gsm update --init;gsm foreach git submodule update --init'
-alias gpls='git submodule sync --recursive;gpl'
+alias gpls='git pull -p --rebase;git submodule sync --recursive;git submodule update --init --recursive'
 alias gfb='git branch -a | ag'
 alias gdc='git diff --cached'
 alias gssp='git stash show -p'
@@ -65,17 +112,16 @@ alias gsb='func_gsb'
 RTC_ABS_PATH=/Users/mj/project/ByteRTCSDK
 RTC_REALX_ABS_PATH=$RTC_ABS_PATH/realx
 function gcortc(){
-    cd $RTC_ABS_PATH
-    gpl
+    git fetch
     gco $1
     gpl
     realx_commit_id=`cat .gitlab-ci_new.yml | grep "realx_branch:" | sed "s/ *$//g" | sed "s/realx_branch://g" | sed "s/ *//g"`
     echo "realx branch is $realx_commit_id"
-    cd $RTC_REALX_ABS_PATH
-    gpl
+    cd realx
+    git fetch
     gco $realx_commit_id
     gpl
-    cd $RTC_ABS_PATH
+    cd ..
 }
 
 #alias gcortc='func_gcortc(){ gpl && gco $1 && gpl && cd $RTC_REALX_ABS_PATH && gpl && gco $1 && gpl && cd $RTC_ABS_PATH;};func_gcortc'

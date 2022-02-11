@@ -2,6 +2,7 @@
 export JAVA_HOME=/Library/Java/JavaVirtualMachines/adoptopenjdk-8.jdk/Contents/Home
 export NDK_ROOT=/Users/mj/Library/Android/sdk/ndk/21.2.6472646
 export ANDROID_NDK=$NDK_ROOT
+export ANDROID_NDK_HOME=$NDK_ROOT
 export ANDROID_SDK=/Users/mj/Library/Android/sdk
 export ANDROID_SDK_ROOT=$ANDROID_SDK
 export QT_HOME=/Users/mj/Qt/5.14.2/clang_64/bin

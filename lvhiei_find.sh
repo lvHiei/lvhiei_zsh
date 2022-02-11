@@ -3,7 +3,11 @@
 prefer_use_ag=1
 
 function findversion(){
-    egrep "[0-9]+\.[0-9]+\.[0-9]+"
+    if [ $# -gt 0 ]; then
+        strings $1 | egrep "[0-9]+\.[0-9]+\.[0-9]+"
+    else
+        egrep "[0-9]+\.[0-9]+\.[0-9]+"
+    fi
 }
 
 function findstr(){
